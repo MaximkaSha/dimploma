@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -31,11 +30,11 @@ func parseStrtoRFC33339(timeStr string) time.Time {
 }
 
 func CheckURL(conn string) bool {
-	resp, err := http.Get("conn")
+	_, err := http.Get(conn)
 	if err != nil {
 		log.Println(err.Error())
 		return false
 	}
-	log.Println(fmt.Sprint(resp.StatusCode) + resp.Status)
+	//log.Println(fmt.Sprint(resp.StatusCode) + resp.Status)
 	return true
 }
