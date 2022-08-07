@@ -215,10 +215,13 @@ func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Ord
 func (s Storage) GetBalance(session models.Session) (int, models.Balance) {
 	var query = `SELECT current, withdrawn from balance WHERE userid = (SELECT id from users where username = $1)`
 	data := models.Balance{}
+	log.Println(session)
 	err := s.DB.QueryRow(query, session.Name).Scan(&data.Current, &data.Withdrawn)
+	log.Println(session)
+	log.Println(data)
 	if err != nil {
 		log.Printf("Error %s when getting balance data", err)
-		return 500, models.Balance{}
+		return 204, models.Balance{}
 	}
 	return 200, data
 }
@@ -299,8 +302,8 @@ func (s Storage) GetHistory(session models.Session) (int, []models.Withdrawn) {
 func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Session) {
 	ret, balance := s.GetBalance(session)
 	if ret != 200 {
-		log.Println("Error getting balance on update.")
-		return
+		log.Printf("No balance data for user: %s", session.Name)
+		//	return
 	}
 	for i := range orders {
 		if upd, order := s.Accural.GetData(orders[i]); upd {
