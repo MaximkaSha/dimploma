@@ -42,7 +42,7 @@ func (a Accural) GetData(order orders.Order) (bool, orders.Order) {
 	}
 	err = json.Unmarshal(body, &order)
 	if err != nil {
-		log.Printf("whoops: %s", err)
+		log.Printf("Unmarshl error accural body: %s", err)
 		return false, order
 	}
 	log.Printf("Accrual order %s, %s, %f", order.Number, order.Status, order.Accural)

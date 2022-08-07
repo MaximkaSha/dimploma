@@ -254,7 +254,7 @@ func (s Storage) UpdateBalance(balance models.Balance, session models.Session) e
 func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session) int {
 	err, balance := s.GetBalance(session)
 	if err != 200 {
-		return 500
+		log.Println("no balance")
 	}
 	if balance.Current < withdrawn.Sum {
 		return 402
@@ -306,7 +306,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		//	return
 	}
 	for i := range orders {
-		log.Printf("User before %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
+		//log.Printf("User before %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
@@ -314,7 +314,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 				balance.Current = balance.Current + order.Accural
 			}
 		}
-		log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
+		//log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 	}
 	err := s.BatchUpdateOrders(orders)
 	if err != nil {
@@ -327,7 +327,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		log.Println("Error updating balance on update.")
 		return
 	}
-	log.Println(s.GetBalance(session))
+	//log.Println(s.GetBalance(session))
 
 }
 
