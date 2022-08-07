@@ -45,5 +45,6 @@ func (a Accural) GetData(order orders.Order) (bool, orders.Order) {
 		log.Printf("whoops: %s", err)
 		return false, order
 	}
+	log.Printf("Accrual order %s, %s, %f", order.Number, order.Status, order.Accural)
 	return true, order
 }

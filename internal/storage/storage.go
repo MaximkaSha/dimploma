@@ -310,6 +310,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
+				log.Printf("Current bal:%f, order bal:%f", balance.Current, order.Accural)
 				balance.Current = balance.Current + order.Accural
 			}
 		}
