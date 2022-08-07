@@ -217,7 +217,7 @@ func (s Storage) GetBalance(session models.Session) (int, models.Balance) {
 	data := models.Balance{}
 	err := s.DB.QueryRow(query, session.Name).Scan(&data.Current, &data.Withdrawn)
 	if err != nil {
-		log.Printf("Error %s when getting balance  data", err)
+		log.Printf("Error %s when getting balance data", err)
 		return 500, models.Balance{}
 	}
 	return 200, data

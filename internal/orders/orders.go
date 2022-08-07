@@ -6,13 +6,13 @@ import (
 )
 
 type Order struct {
-	Number     int64   `json:"number"`
+	Number     string  `json:"number"`
 	Status     string  `json:"status"`
 	Accural    float64 `json:"accural"`
 	UploadedAt string  `json:"uploaded_at"`
 }
 
-func NewOrder(number int64) Order {
+func NewOrder(number string) Order {
 	return Order{
 		Number:     number,
 		Status:     "NEW",

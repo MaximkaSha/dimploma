@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -35,6 +36,6 @@ func CheckURL(conn string) bool {
 		log.Println(err.Error())
 		return false
 	}
-	log.Println(string(resp.StatusCode) + resp.Status)
+	log.Println(fmt.Sprint(resp.StatusCode) + resp.Status)
 	return true
 }

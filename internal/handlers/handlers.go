@@ -152,7 +152,7 @@ func (h *Handlers) PostOrders(w http.ResponseWriter, r *http.Request) {
 	}
 	token := c.Value
 	session, err := h.Auth.GetSessionByUUID(token)
-	order := orders.NewOrder(int64(orderNum))
+	order := orders.NewOrder(string(orderBuf))
 	w.WriteHeader(h.Store.AddOrder(order, session))
 	return
 }
