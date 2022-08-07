@@ -24,8 +24,8 @@ type User struct {
 }
 
 type Balance struct {
-	Current   Num `json:"current"`
-	Withdrawn Num `json:"withdrawn"`
+	Current   Num `json:"current,omitempty"`
+	Withdrawn Num `json:"withdrawnt,omitempty"`
 }
 
 type Withdrawn struct {
