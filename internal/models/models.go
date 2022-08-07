@@ -24,8 +24,8 @@ type User struct {
 }
 
 type Balance struct {
-	Current   Num `json:"current,omitempty"`
-	Withdrawn Num `json:"withdrawnt,omitempty"`
+	Current   Num `json:"current"`
+	Withdrawn Num `json:"withdrawn"`
 }
 
 type Withdrawn struct {
@@ -69,5 +69,5 @@ type Balance struct {
 }
 */
 func (n Num) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatFloat(float64(n), 'f', 2, 32)), nil
+	return []byte(strconv.FormatFloat(float64(n), 'f', 1, 32)), nil
 }
