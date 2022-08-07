@@ -256,11 +256,11 @@ func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session
 	if err != 200 {
 		log.Println("no balance")
 	}
-	if balance.Current < withdrawn.Sum {
+	if models.Num(balance.Current) < models.Num(withdrawn.Sum) {
 		return 402
 	}
-	balance.Withdrawn = balance.Withdrawn + withdrawn.Sum
-	balance.Current = balance.Current - withdrawn.Sum
+	balance.Withdrawn = models.Num(balance.Withdrawn) + models.Num(withdrawn.Sum)
+	balance.Current = models.Num(balance.Current) - models.Num(withdrawn.Sum)
 	e := s.UpdateBalance(balance, session)
 	if e != nil {
 		return 500
@@ -311,7 +311,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 			orders[i] = order
 			if order.Status == "PROCESSED" {
 				log.Printf("Current bal:%f, order bal:%f", balance.Current, order.Accural)
-				balance.Current = balance.Current + order.Accural
+				balance.Current = models.Num(balance.Current) + models.Num(order.Accural)
 			}
 		}
 		//log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)

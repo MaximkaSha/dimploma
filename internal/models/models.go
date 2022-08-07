@@ -1,6 +1,8 @@
 package models
 
 import (
+	//"fmt"
+	"strconv"
 	"time"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
@@ -14,14 +16,16 @@ import (
 
 */
 
+type Num float64
+
 type User struct {
 	Password string `json:"password"`
 	Username string `json:"login"`
 }
 
 type Balance struct {
-	Current   float32 `json:"current"`
-	Withdrawn float32 `json:"withdrawn"`
+	Current   Num `json:"current"`
+	Withdrawn Num `json:"withdrawn"`
 }
 
 type Withdrawn struct {
@@ -56,4 +60,14 @@ type Storager interface {
 
 func (s Session) IsExpired() bool {
 	return s.Expiry.Before(time.Now())
+}
+
+/*
+type Balance struct {
+	Current   float32 `json:"current"`
+	Withdrawn float32 `json:"withdrawn"`
+}
+*/
+func (n Num) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.FormatFloat(float64(n), 'f', 2, 32)), nil
 }
