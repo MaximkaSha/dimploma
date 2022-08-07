@@ -8,7 +8,7 @@ import (
 type Order struct {
 	Number     string  `json:"number"`
 	Status     string  `json:"status"`
-	Accural    float64 `json:"accural"`
+	Accural    float64 `json:"accural,omitempty"`
 	UploadedAt string  `json:"uploaded_at"`
 }
 
