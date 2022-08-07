@@ -306,14 +306,14 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		//	return
 	}
 	for i := range orders {
-		log.Printf("User %s order #%s: %s", session.Name, orders[i].Number, orders[i].Status)
+		log.Printf("User before %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
 				balance.Current = balance.Current + order.Accural
 			}
 		}
-		log.Printf("User %s order #%s: %s", session.Name, orders[i].Number, orders[i].Status)
+		log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 	}
 	err := s.BatchUpdateOrders(orders)
 	if err != nil {
@@ -326,6 +326,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		log.Println("Error updating balance on update.")
 		return
 	}
+	log.Println(s.GetBalance(session))
 
 }
 
