@@ -181,7 +181,7 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	session, err := h.Auth.GetSessionByUUID(token)
 	balance := models.Balance{}
 	ret, balance := h.Store.GetBalance(session)
-	//log.Println(balance)
+	log.Printf("Get balance data:%f, %f", balance.Current, balance.Withdrawn)
 	JSONdata, err := json.Marshal(balance)
 	if err != nil {
 		w.WriteHeader(ret)
