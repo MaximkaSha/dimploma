@@ -322,6 +322,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 	}
 	//это наверное надо в пачку засунуть, а то получиться, что заказы обновились, а бабки не начислились
 	// печальная будет ситуация :)
+	log.Printf("balance Update curr = %f, with = %f", float32(balance.Current), float32(balance.Withdrawn))
 	err = s.UpdateBalance(balance, session)
 	if err != nil {
 		log.Println("Error updating balance on update.")

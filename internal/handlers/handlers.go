@@ -184,6 +184,7 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
 	JSONdata, err := json.Marshal(balance)
 	if err != nil {
+		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
