@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -182,11 +183,14 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	balance := models.Balance{}
 	ret, balance := h.Store.GetBalance(session)
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
-	bbbb := models.Balance{
-		Current:   balance.Current,
-		Withdrawn: balance.Withdrawn,
-	}
-	JSONdata, err := json.Marshal(bbbb)
+	byteBuff := new(bytes.Buffer)
+	json.NewEncoder(byteBuff).Encode(balance)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(byteBuff.Bytes())
+	//io.Copy(w, byteBuff)
+	log.Println(err)
+	log.Println(ret)
+	/*JSONdata, err := json.Marshal(balance)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
@@ -194,11 +198,8 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	_, err = w.Write(JSONdata)
-	if err != nil {
-		log.Println(err)
-	}
-	return
+	w.Write(JSONdata)
+	return */
 }
 
 func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {

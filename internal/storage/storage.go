@@ -162,7 +162,10 @@ func (s Storage) AddOrder(order orders.Order, session models.Session) int {
 func (s Storage) GetAllOrders(session models.Session) (int, []orders.Order) {
 	var query = `SELECT ordernum , status , accural , upload_time from orders where userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
-	//	err = rows.Err()
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 204, []orders.Order{}
