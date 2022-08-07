@@ -217,8 +217,8 @@ func (s Storage) GetBalance(session models.Session) (int, models.Balance) {
 	data := models.Balance{}
 	log.Println(session)
 	err := s.DB.QueryRow(query, session.Name).Scan(&data.Current, &data.Withdrawn)
-	log.Println(session)
-	log.Println(data)
+	//log.Println(session)
+	//log.Println(data)
 	if err != nil {
 		log.Printf("Error %s when getting balance data", err)
 		return 204, models.Balance{}
@@ -306,12 +306,14 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		//	return
 	}
 	for i := range orders {
+		log.Printf("User %s order #%s: %s", session.Name, orders[i].Number, orders[i].Status)
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
 				balance.Current = balance.Current + order.Accural
 			}
 		}
+		log.Printf("User %s order #%s: %s", session.Name, orders[i].Number, orders[i].Status)
 	}
 	err := s.BatchUpdateOrders(orders)
 	if err != nil {
