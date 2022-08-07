@@ -188,6 +188,12 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(ret)
 		return
 	}
+	err = json.Unmarshal(JSONdata, &balance)
+	if err != nil {
+		log.Printf("json erro: %s", err)
+	}
+	log.Println("JSON decode!")
+	log.Println(balance)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
