@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/config"
@@ -44,6 +45,8 @@ func (s *Service) StartService() {
 		})
 
 	})
-
-	http.ListenAndServe(s.cnfg.Addr, r)
+	log.Printf("Started service on %s", s.cnfg.Addr)
+	if err := http.ListenAndServe(s.cnfg.Addr, r); err != nil {
+		log.Printf("Server shutdown: %s", err.Error())
+	}
 }

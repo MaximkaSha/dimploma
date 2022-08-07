@@ -17,7 +17,7 @@ type Accural struct {
 
 func NewAccural(URL string) Accural {
 	if !utils.CheckURL(URL) {
-		log.Fatal("Accural is not availble!")
+		log.Println("Accural is not availble! Some functions are not availiable")
 	}
 	return Accural{
 		URL: URL,
