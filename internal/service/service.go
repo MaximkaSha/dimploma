@@ -24,9 +24,8 @@ func NewService() *Service {
 func (s *Service) StartService() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	cnfg := config.NewConfig()
 	// URL accrual and DB
-	handler := handlers.NewHandlers(cnfg)
+	handler := handlers.NewHandlers(s.cnfg)
 
 	//pub access
 	r.Post("/api/user/register", handler.Register)
