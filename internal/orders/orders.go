@@ -9,7 +9,7 @@ type Order struct {
 	Number     string  `json:"number"`
 	Status     string  `json:"status"`
 	Accural    float64 `json:"accural,omitempty"`
-	UploadedAt string  `json:"uploaded_at"`
+	UploadedAt string  `json:"uploaded_at,omitempty"`
 }
 
 func NewOrder(number string) Order {

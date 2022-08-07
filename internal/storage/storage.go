@@ -215,7 +215,7 @@ func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Ord
 func (s Storage) GetBalance(session models.Session) (int, models.Balance) {
 	var query = `SELECT current, withdrawn from balance WHERE userid = (SELECT id from users where username = $1)`
 	data := models.Balance{}
-	log.Println(session)
+	//log.Println(session)
 	err := s.DB.QueryRow(query, session.Name).Scan(&data.Current, &data.Withdrawn)
 	//log.Println(session)
 	//log.Println(data)
