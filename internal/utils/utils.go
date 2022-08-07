@@ -30,11 +30,12 @@ func parseStrtoRFC33339(timeStr string) time.Time {
 }
 
 func CheckURL(conn string) bool {
-	_, err := http.Get(conn)
+	resp, err := http.Get(conn)
 	if err != nil {
 		log.Println(err.Error())
 		return false
 	}
+	defer resp.Body.Close()
 	//log.Println(fmt.Sprint(resp.StatusCode) + resp.Status)
 	return true
 }

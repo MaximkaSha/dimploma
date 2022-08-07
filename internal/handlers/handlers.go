@@ -179,24 +179,25 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_token")
 	token := c.Value
 	session, err := h.Auth.GetSessionByUUID(token)
-	blnce := models.Balance{}
-	ret, blnce := h.Store.GetBalance(session)
-	log.Printf("Get balance data:%f,%f", blnce.Current, blnce.Withdrawn)
-	JSONdata, err := json.Marshal(blnce)
+	balance := models.Balance{}
+	ret, balance := h.Store.GetBalance(session)
+	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
+	bbbb := models.Balance{
+		Current:   balance.Current,
+		Withdrawn: balance.Withdrawn,
+	}
+	JSONdata, err := json.Marshal(bbbb)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
-	err = json.Unmarshal(JSONdata, &blnce)
-	if err != nil {
-		log.Printf("json erro: %s", err)
-	}
-	log.Println("JSON decode!")
-	log.Println(blnce)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	w.Write(JSONdata)
+	_, err = w.Write(JSONdata)
+	if err != nil {
+		log.Println(err)
+	}
 	return
 }
 
