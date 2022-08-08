@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
-
-	"github.com/shopspring/decimal"
+	//"github.com/shopspring/decimal"
 )
 
 /*
@@ -28,11 +27,6 @@ type User struct {
 type Balance struct {
 	Current   float32 `json:"current"`
 	Withdrawn float32 `json:"withdrawn"`
-}
-
-type BalanceShow struct {
-	Current   decimal.Decimal `json:"current"`
-	Withdrawn decimal.Decimal `json:"withdrawn"`
 }
 
 type Withdrawn struct {

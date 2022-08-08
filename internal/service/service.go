@@ -8,7 +8,8 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	//"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog"
 )
 
 type Service struct {
@@ -23,7 +24,10 @@ func NewService() *Service {
 
 func (s *Service) StartService() {
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	logger := httplog.NewLogger("logger", httplog.Options{
+		JSON: false,
+	})
+	r.Use(httplog.RequestLogger(logger))
 	// URL accrual and DB
 	handler := handlers.NewHandlers(s.cnfg)
 
