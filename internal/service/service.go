@@ -1,6 +1,7 @@
 package service
 
 import (
+	"compress/flate"
 	"log"
 	"net/http"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
-	//"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
 )
 
@@ -25,8 +26,11 @@ func NewService() *Service {
 func (s *Service) StartService() {
 	r := chi.NewRouter()
 	logger := httplog.NewLogger("logger", httplog.Options{
-		JSON: false,
+		JSON:     false,
+		LogLevel: "trace",
 	})
+	compressor := middleware.NewCompressor(flate.DefaultCompression)
+	r.Use(compressor.Handler)
 	r.Use(httplog.RequestLogger(logger))
 	// URL accrual and DB
 	handler := handlers.NewHandlers(s.cnfg)
