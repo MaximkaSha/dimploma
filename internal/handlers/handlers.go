@@ -66,8 +66,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	return
-
 }
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +98,6 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	return
 
 }
 
@@ -156,17 +153,17 @@ func (h *Handlers) PostOrders(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
+	session, _ := h.Auth.GetSessionByUUID(token)
+
 	order := orders.NewOrder(string(orderBuf))
 	w.WriteHeader(h.Store.AddOrder(order, session))
-	return
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
+	c, _ := r.Cookie("session_token")
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	orders := []orders.Order{}
+	session, _ := h.Auth.GetSessionByUUID(token)
+	//orders := []orders.Order{}
 	ret, orders := h.Store.GetAllOrders(session)
 	//log.Println(orders)
 	JSONdata, err := json.Marshal(orders)
@@ -178,13 +175,13 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(ret)
 	//log.Println(hex.EncodeToString(JSONdata))
 	w.Write(JSONdata)
-	return
+
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
+	c, _ := r.Cookie("session_token")
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
+	session, _ := h.Auth.GetSessionByUUID(token)
 	balance := models.Balance{}
 	ret, balance := h.Store.GetBalance(session)
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
@@ -197,7 +194,7 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
-	return
+
 }
 
 func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
@@ -218,12 +215,12 @@ func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(422)
 		return
 	}
-	c, err := r.Cookie("session_token")
+	c, _ := r.Cookie("session_token")
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
+	session, _ := h.Auth.GetSessionByUUID(token)
 	ret := h.Store.PostWithdraw(withdrawn, session)
 	w.WriteHeader(ret)
-	return
+
 }
 
 func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
@@ -233,7 +230,7 @@ func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
+	session, _ := h.Auth.GetSessionByUUID(token)
 	ret, history := h.Store.GetHistory(session)
 	//utils.SortSliceByRFC3339(history)
 	JSONdata, err := json.Marshal(history)
@@ -244,7 +241,7 @@ func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
-	return
+
 }
 
 func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
@@ -257,7 +254,7 @@ func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 			}
 		}
 		token := c.Value
-		session, err := h.Auth.GetSessionByUUID(token)
+		session, _ := h.Auth.GetSessionByUUID(token)
 		_, orders := h.Store.GetAllOrdersToUpdate(session)
 		//log.Println(orders)
 		if len(orders) == 0 {

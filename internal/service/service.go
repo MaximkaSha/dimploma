@@ -32,7 +32,6 @@ func (s *Service) StartService() {
 	compressor := middleware.NewCompressor(flate.DefaultCompression)
 	r.Use(compressor.Handler)
 	r.Use(httplog.RequestLogger(logger))
-	// URL accrual and DB
 	handler := handlers.NewHandlers(s.cnfg)
 
 	//pub access

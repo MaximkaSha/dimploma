@@ -191,7 +191,10 @@ func (s Storage) GetAllOrders(session models.Session) (int, []orders.Order) {
 func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Order) {
 	var query = `SELECT ordernum , status , accural , upload_time FROM public.orders WHERE status = 'NEW' OR status = 'PROCESSING' AND userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
-	//	err = rows.Err()
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 204, []orders.Order{}
@@ -278,6 +281,10 @@ func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session
 func (s Storage) GetHistory(session models.Session) (int, []models.Withdrawn) {
 	var query = `SELECT sum , processed_at , "order"  from history where userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 500, []models.Withdrawn{}
