@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"encoding/hex"
+	//"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -14,6 +14,7 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/models"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/storage"
+	"github.com/shopspring/decimal"
 
 	"github.com/google/uuid"
 	"github.com/theplant/luhn"
@@ -190,10 +191,21 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(ret)
 		return
 	}
+	var balanceShow models.BalanceShow
+	balanceShow.Current = decimal.NewFromFloat32(balance.Current)
+	balanceShow.Withdrawn = decimal.NewFromFloat32(balance.Withdrawn)
+	decimal.MarshalJSONWithoutQuotes = true
+	JSONdata, err = json.Marshal(balanceShow)
+	if err != nil {
+		log.Printf("Balance marshal error %s", err)
+		w.WriteHeader(ret)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	log.Println("dump balance data:")
-	log.Println(hex.EncodeToString(JSONdata))
+	//log.Println("dump balance data:")
+	//log.Println(hex.EncodeToString(JSONdata))
+	//json.Unmarshal(JSONdata, &balance)
 	w.Write(JSONdata)
 	return
 }
