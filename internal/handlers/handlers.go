@@ -238,7 +238,7 @@ func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(ret)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
 
