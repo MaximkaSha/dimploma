@@ -75,5 +75,6 @@ func (s Service) Test(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(200)
+	log.Println("HARDCODED")
 	w.Write(JSNd)
 }
