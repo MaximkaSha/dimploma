@@ -327,6 +327,10 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		}
 		//log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 	}
+	if len(orders) == 0 {
+		log.Println("No orders to update")
+		return
+	}
 	err := s.BatchUpdateOrders(orders)
 	if err != nil {
 		log.Printf("Order status update error: %s", err)
