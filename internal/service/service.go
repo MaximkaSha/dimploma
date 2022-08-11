@@ -41,8 +41,8 @@ func (s *Service) StartService() {
 	r.Post("/api/user/login", handler.Login)
 	//Test
 	r.Group(func(r chi.Router) {
-		r.Use(handler.UpdateUserInfo)
-		r.Get("/api/user/balance", handler.GetBalance)
+		r.Use(handler.UpdateUserInfoTest)
+		r.Get("/api/user/balance", handler.GetBalanceTest)
 	})
 	//user only
 	r.Group(func(r chi.Router) {

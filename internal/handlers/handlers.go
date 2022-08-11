@@ -191,6 +191,51 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (h *Handlers) GetBalanceTest(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	}
+	token := c.Value
+	session, err := h.Auth.GetSessionByUUID(token)
+	ret, balance := h.Store.GetBalance(session)
+	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
+	JSONdata, err := json.Marshal(balance)
+	if err != nil {
+		log.Printf("Balance marshal error %s", err)
+		w.WriteHeader(ret)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.WriteHeader(ret)
+	w.Write(JSONdata)
+
+}
+
+func (h *Handlers) UpdateUserInfoTest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		}
+		token := c.Value
+		session, err := h.Auth.GetSessionByUUID(token)
+		_, orders := h.Store.GetAllOrdersToUpdate(session)
+		//log.Println(orders)
+		if len(orders) == 0 {
+			next.ServeHTTP(w, r)
+		}
+		h.Store.UpdateOrdersStatus(orders, session)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 	withdrawn := models.NewWithdrawn()
 	err := json.NewDecoder(r.Body).Decode(&withdrawn)
