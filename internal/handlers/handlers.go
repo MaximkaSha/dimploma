@@ -174,7 +174,6 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	//log.Println(hex.EncodeToString(JSONdata))
 	w.Write(JSONdata)
 
 }
@@ -247,6 +246,7 @@ func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 		//log.Println(orders)
 		if len(orders) == 0 {
 			next.ServeHTTP(w, r)
+			return
 		}
 		h.Store.UpdateOrdersStatus(orders, session)
 		next.ServeHTTP(w, r)
