@@ -263,7 +263,7 @@ func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session
 	if err != 200 {
 		log.Println("no balance")
 	}
-	if models.Num(balance.Current) < models.Num(withdrawn.Sum) {
+	if balance.Current < withdrawn.Sum {
 		return 402
 	}
 	balance.Withdrawn = balance.Withdrawn + withdrawn.Sum

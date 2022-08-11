@@ -2,7 +2,7 @@ package models
 
 import (
 	//"fmt"
-	"strconv"
+
 	"time"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
@@ -17,7 +17,6 @@ import (
 
 */
 
-type Num float64
 type CtxUserName string
 
 type User struct {
@@ -70,9 +69,6 @@ type Balance struct {
 	Withdrawn float32 `json:"withdrawn"`
 }
 */
-func (n Num) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatFloat(float64(n), 'f', 1, 32)), nil
-}
 
 func (c CtxUserName) String() string {
 	return string(c)
