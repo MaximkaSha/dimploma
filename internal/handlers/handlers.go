@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
+	"runtime"
 
 	//"net/http/httputil"
 	"strconv"
@@ -178,6 +180,8 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
+	_enter()
+	defer _exit()
 	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
 	str := `{"current":%.2f,"withdrawn":%.2f}`
@@ -254,4 +258,26 @@ func (h Handlers) GetSessionFromConxtex(ctx context.Context) models.Session {
 	return models.Session{
 		Name: ctx.Value(userName).(string),
 	}
+}
+
+func _enter() {
+	// Skip this function, and fetch the PC and file for its parent
+	pc, _, _, _ := runtime.Caller(1)
+	// Retrieve a Function object this functions parent
+	functionObject := runtime.FuncForPC(pc)
+	// Regex to extract just the function name (and not the module path)
+	extractFnName := regexp.MustCompile(`^.*\.(.*)$`)
+	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
+	fmt.Printf("Entering %s\n", fnName)
+}
+
+func _exit() {
+	// Skip this function, and fetch the PC and file for its parent
+	pc, _, _, _ := runtime.Caller(1)
+	// Retrieve a Function object this functions parent
+	functionObject := runtime.FuncForPC(pc)
+	// Regex to extract just the function name (and not the module path)
+	extractFnName := regexp.MustCompile(`^.*\.(.*)$`)
+	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
+	fmt.Printf("Exiting  %s\n", fnName)
 }
