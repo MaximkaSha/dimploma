@@ -2,7 +2,7 @@ package service
 
 import (
 	"compress/flate"
-	"encoding/json"
+	//"encoding/json"
 	"log"
 	"net/http"
 
@@ -40,7 +40,7 @@ func (s *Service) StartService() {
 	r.Post("/api/user/register", handler.Register)
 	r.Post("/api/user/login", handler.Login)
 	//Test
-	r.Get("/api/user/balance1", s.Test)
+	//r.Get("/api/user/balance1", s.Test)
 	r.Group(func(r chi.Router) {
 		r.Use(handler.UpdateUserInfoTest)
 		r.Get("/api/user/balance", handler.GetBalanceTest)
@@ -65,6 +65,7 @@ func (s *Service) StartService() {
 	}
 }
 
+/*
 func (s Service) Test(w http.ResponseWriter, r *http.Request) {
 	type JSONtest struct {
 		Current   float32 `json:"current"`
@@ -82,4 +83,4 @@ func (s Service) Test(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	log.Println("HARDCODED")
 	w.Write(JSNd)
-}
+}*/

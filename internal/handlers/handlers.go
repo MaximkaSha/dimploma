@@ -217,7 +217,7 @@ func (h *Handlers) GetBalanceTest(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(ret)
 		return
 	}
-	//w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	//w.WriteHeader(ret)
 	w.Write(JSONdata)
 
