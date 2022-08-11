@@ -207,8 +207,8 @@ func (h *Handlers) GetBalanceTest(w http.ResponseWriter, r *http.Request) {
 		Withdrawn float32 `json:"withdrawn"`
 	}
 	tst := JSONtest{
-		Current:   float32(float64(balance.Current)),
-		Withdrawn: float32(float64(balance.Withdrawn)),
+		Current:   balance.Current,
+		Withdrawn: balance.Withdrawn,
 	}
 	log.Printf("Get balance data:%f,%f", tst.Current, tst.Withdrawn)
 	JSONdata, err := json.Marshal(tst)

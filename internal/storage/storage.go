@@ -108,8 +108,8 @@ CREATE TABLE IF NOT EXISTS public.balance
 (
     id serial ,
     userid bigint NOT NULL,
-    current double precision NOT NULL,
-    withdrawn double precision NOT NULL,
+    current real NOT NULL,
+    withdrawn real NOT NULL,
 	primary key(userid)
 );
 CREATE TABLE IF NOT EXISTS public.history

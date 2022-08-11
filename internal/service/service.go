@@ -40,6 +40,7 @@ func (s *Service) StartService() {
 	r.Post("/api/user/register", handler.Register)
 	r.Post("/api/user/login", handler.Login)
 	//Test
+	r.Get("/api/user/balance1", s.Test)
 	r.Group(func(r chi.Router) {
 		r.Use(handler.UpdateUserInfoTest)
 		r.Get("/api/user/balance", handler.GetBalanceTest)
