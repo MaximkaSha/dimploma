@@ -1,17 +1,12 @@
 package handlers
 
 import (
-	//"encoding/hex"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
-	"runtime"
 
-	//"net/http/httputil"
 	"strconv"
 	"time"
 
@@ -20,8 +15,6 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/models"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/storage"
-
-	//"github.com/shopspring/decimal"
 
 	"github.com/google/uuid"
 	"github.com/theplant/luhn"
@@ -179,24 +172,16 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	_enter()
-	defer _exit()
 	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
-	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
-	str := `{"current":%.2f,"withdrawn":%.2f}`
-	str = fmt.Sprintf(str, balance.Current, balance.Withdrawn)
-	JSONdata, err := json.Marshal(str)
+	JSONdata, err := json.Marshal(balance)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
-	log.Println("Data:")
-	log.Println(balance)
-	log.Printf("Data marshal len %v", len(JSONdata))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	w.Write([]byte(str))
+	w.Write(JSONdata)
 	//return
 }
 
@@ -260,6 +245,7 @@ func (h Handlers) GetSessionFromConxtex(ctx context.Context) models.Session {
 	}
 }
 
+/*
 func _enter() {
 	// Skip this function, and fetch the PC and file for its parent
 	pc, _, _, _ := runtime.Caller(1)
@@ -281,3 +267,4 @@ func _exit() {
 	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
 	fmt.Printf("Exiting  %s\n", fnName)
 }
+*/

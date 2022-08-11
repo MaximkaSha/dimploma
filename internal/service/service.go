@@ -39,7 +39,6 @@ func (s *Service) StartService() {
 	//pub access
 	r.Post("/api/user/register", handler.Register)
 	r.Post("/api/user/login", handler.Login)
-
 	//user only
 	r.Group(func(r chi.Router) {
 		r.Use(handler.CheckAuthMiddleWare)
