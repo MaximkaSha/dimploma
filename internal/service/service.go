@@ -33,6 +33,7 @@ func (s *Service) StartService() {
 	r.Use(compressor.Handler)
 	r.Use(httplog.RequestLogger(logger))
 	handler := handlers.NewHandlers(s.cnfg)
+	go handler.Auth.SessionCleaner()
 
 	//pub access
 	r.Post("/api/user/register", handler.Register)

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	//"encoding/hex"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -121,7 +122,8 @@ func (h *Handlers) CheckAuthMiddleWare(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "name", session.Name)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -160,12 +162,7 @@ func (h *Handlers) PostOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("session_token")
-	token := c.Value
-	session, _ := h.Auth.GetSessionByUUID(token)
-	//orders := []orders.Order{}
-	ret, orders := h.Store.GetAllOrders(session)
-	//log.Println(orders)
+	ret, orders := h.Store.GetAllOrders(h.GetSessionFromConxtex(r.Context()))
 	JSONdata, err := json.Marshal(orders)
 	if err != nil {
 		w.WriteHeader(ret)
@@ -179,11 +176,7 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("session_token")
-	token := c.Value
-	session, _ := h.Auth.GetSessionByUUID(token)
-	balance := models.Balance{}
-	ret, balance := h.Store.GetBalance(session)
+	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
 	JSONdata, err := json.Marshal(balance)
 	if err != nil {
@@ -224,15 +217,7 @@ func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
-	token := c.Value
-	session, _ := h.Auth.GetSessionByUUID(token)
-	ret, history := h.Store.GetHistory(session)
-	//utils.SortSliceByRFC3339(history)
+	ret, history := h.Store.GetHistory(h.GetSessionFromConxtex(r.Context()))
 	JSONdata, err := json.Marshal(history)
 	if err != nil {
 		w.WriteHeader(ret)
@@ -246,15 +231,7 @@ func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("session_token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-		}
-		token := c.Value
-		session, _ := h.Auth.GetSessionByUUID(token)
+		session := h.GetSessionFromConxtex(r.Context())
 		_, orders := h.Store.GetAllOrdersToUpdate(session)
 		//log.Println(orders)
 		if len(orders) == 0 {
@@ -263,4 +240,10 @@ func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 		h.Store.UpdateOrdersStatus(orders, session)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (h Handlers) GetSessionFromConxtex(ctx context.Context) models.Session {
+	return models.Session{
+		Name: ctx.Value("name").(string),
+	}
 }
