@@ -18,7 +18,7 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/storage"
 
-	//"github.com/shopspring/decimal"
+	"github.com/shopspring/decimal"
 
 	"github.com/google/uuid"
 	"github.com/theplant/luhn"
@@ -179,66 +179,21 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
-	JSONdata, err := json.Marshal(balance)
+	var bal models.BalanceD
+	tmp := strconv.FormatFloat(float64(balance.Current), 'f', 2, 32)
+	tmp1 := strconv.FormatFloat(float64(balance.Withdrawn), 'f', 2, 32)
+	bal.Cur, _ = decimal.NewFromString(tmp)
+	bal.With, _ = decimal.NewFromString(tmp1)
+	JSONdata, err := json.Marshal(bal)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
 
-}
-
-func (h *Handlers) GetBalanceTest(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-	}
-	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	ret, balance := h.Store.GetBalance(session)
-	type JSONtest struct {
-		Current   float32 `json:"current"`
-		Withdrawn float32 `json:"withdrawn"`
-	}
-	tst := JSONtest{
-		Current:   balance.Current,
-		Withdrawn: balance.Withdrawn,
-	}
-	log.Printf("Get balance data:%f,%f", tst.Current, tst.Withdrawn)
-	JSONdata, err := json.Marshal(tst)
-	if err != nil {
-		log.Printf("Balance marshal error %s", err)
-		w.WriteHeader(ret)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json;charset=utf-8")
-	w.WriteHeader(200)
-	w.Write(JSONdata)
-
-}
-
-func (h *Handlers) UpdateUserInfoTest(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("session_token")
-		if err != nil {
-			log.Println("no cookie")
-		}
-		token := c.Value
-		session, err := h.Auth.GetSessionByUUID(token)
-		_, orders := h.Store.GetAllOrdersToUpdate(session)
-		//log.Println(orders)
-		if len(orders) == 0 {
-			next.ServeHTTP(w, r)
-		}
-		h.Store.UpdateOrdersStatus(orders, session)
-		next.ServeHTTP(w, r)
-	})
 }
 
 func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {

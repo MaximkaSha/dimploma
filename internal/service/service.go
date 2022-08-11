@@ -39,12 +39,7 @@ func (s *Service) StartService() {
 	//pub access
 	r.Post("/api/user/register", handler.Register)
 	r.Post("/api/user/login", handler.Login)
-	//Test
-	//r.Get("/api/user/balance1", s.Test)
-	r.Group(func(r chi.Router) {
-		r.Use(handler.UpdateUserInfoTest)
-		r.Get("/api/user/balance", handler.GetBalanceTest)
-	})
+
 	//user only
 	r.Group(func(r chi.Router) {
 		r.Use(handler.CheckAuthMiddleWare)
@@ -55,7 +50,7 @@ func (s *Service) StartService() {
 			r.Use(handler.UpdateUserInfo)
 			r.Post("/api/user/balance/withdraw", handler.PostWithdraw)
 			r.Get("/api/user/orders", handler.GetOrders)
-			//r.Get("/api/user/balance", handler.GetBalance)
+			r.Get("/api/user/balance", handler.GetBalance)
 		})
 
 	})
