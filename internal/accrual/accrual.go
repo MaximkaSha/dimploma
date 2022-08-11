@@ -25,7 +25,7 @@ func NewAccural(URL string) Accural {
 }
 
 func (a Accural) GetData(order orders.Order) (bool, orders.Order) {
-	r, err := http.Get(a.URL + "/api/orders/" + fmt.Sprint(order.Number))
+	r, err := http.Get("" + "/api/orders/" + fmt.Sprint(order.Number))
 	if err != nil {
 		log.Printf("Accural GET error: %s", err)
 		return false, order
