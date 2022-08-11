@@ -196,7 +196,7 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	} */
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
-	w.Write(JSONdata)
+	w.Write([]byte(str))
 
 }
 
