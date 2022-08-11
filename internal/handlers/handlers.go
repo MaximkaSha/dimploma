@@ -190,6 +190,12 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(ret)
 		return
 	}
+	log.Println("Data:")
+	log.Println(bal)
+	log.Printf("Data marshal len %v", len(JSONdata))
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
