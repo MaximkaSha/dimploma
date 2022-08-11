@@ -212,6 +212,7 @@ func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Ord
 		data = append(data, model)
 	}
 	if counter == 0 {
+		log.Println("no data was found to update")
 		return 204, data
 	}
 	//log.Println(data)
@@ -320,7 +321,7 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
-				log.Printf("Current bal:%f, order bal:%f", balance.Current, order.Accural)
+				//log.Printf("Current bal:%f, order bal:%f", balance.Current, order.Accural)
 				balance.Current = balance.Current + order.Accural
 			}
 		}

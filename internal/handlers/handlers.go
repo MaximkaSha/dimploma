@@ -202,8 +202,16 @@ func (h *Handlers) GetBalanceTest(w http.ResponseWriter, r *http.Request) {
 	token := c.Value
 	session, err := h.Auth.GetSessionByUUID(token)
 	ret, balance := h.Store.GetBalance(session)
-	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
-	JSONdata, err := json.Marshal(balance)
+	type JSONtest struct {
+		Current   float32 `json:"current"`
+		Withdrawn float32 `json:"withdrawn"`
+	}
+	tst := JSONtest{
+		Current:   balance.Current,
+		Withdrawn: balance.Withdrawn,
+	}
+	log.Printf("Get balance data:%f,%f", tst.Current, tst.Withdrawn)
+	JSONdata, err := json.Marshal(tst)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
@@ -219,10 +227,7 @@ func (h *Handlers) UpdateUserInfoTest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("session_token")
 		if err != nil {
-			if err == http.ErrNoCookie {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
+			log.Println("no cookie")
 		}
 		token := c.Value
 		session, err := h.Auth.GetSessionByUUID(token)
