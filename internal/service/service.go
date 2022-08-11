@@ -2,6 +2,7 @@ package service
 
 import (
 	"compress/flate"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -38,6 +39,7 @@ func (s *Service) StartService() {
 	//pub access
 	r.Post("/api/user/register", handler.Register)
 	r.Post("/api/user/login", handler.Login)
+	r.Get("/api/user/balance", s.Test)
 	//user only
 	r.Group(func(r chi.Router) {
 		r.Use(handler.CheckAuthMiddleWare)
@@ -48,7 +50,7 @@ func (s *Service) StartService() {
 			r.Use(handler.UpdateUserInfo)
 			r.Post("/api/user/balance/withdraw", handler.PostWithdraw)
 			r.Get("/api/user/orders", handler.GetOrders)
-			r.Get("/api/user/balance", handler.GetBalance)
+			//r.Get("/api/user/balance", handler.GetBalance)
 		})
 
 	})
@@ -56,4 +58,22 @@ func (s *Service) StartService() {
 	if err := http.ListenAndServe(s.cnfg.Addr, r); err != nil {
 		log.Printf("Server shutdown: %s", err.Error())
 	}
+}
+
+func (s Service) Test(w http.ResponseWriter, r *http.Request) {
+	type JSONtest struct {
+		Current   float32 `json:"current"`
+		Withdrawn float32 `json:"withdrawn"`
+	}
+	tst := JSONtest{
+		Current:   729.98,
+		Withdrawn: 0,
+	}
+	JSNd, err := json.Marshal(tst)
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(200)
+	w.Write(JSNd)
 }
