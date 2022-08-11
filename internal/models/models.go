@@ -18,6 +18,7 @@ import (
 */
 
 type Num float64
+type CtxUserName string
 
 type User struct {
 	Password string `json:"password"`
@@ -71,4 +72,8 @@ type Balance struct {
 */
 func (n Num) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatFloat(float64(n), 'f', 1, 32)), nil
+}
+
+func (c CtxUserName) String() string {
+	return string(c)
 }

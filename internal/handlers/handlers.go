@@ -122,7 +122,8 @@ func (h *Handlers) CheckAuthMiddleWare(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "name", session.Name)
+		var userName models.CtxUserName = "name"
+		ctx := context.WithValue(r.Context(), userName, session.Name)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -243,7 +244,8 @@ func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 }
 
 func (h Handlers) GetSessionFromConxtex(ctx context.Context) models.Session {
+	var userName models.CtxUserName = "name"
 	return models.Session{
-		Name: ctx.Value("name").(string),
+		Name: ctx.Value(userName).(string),
 	}
 }
