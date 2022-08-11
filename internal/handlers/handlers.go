@@ -4,6 +4,7 @@ import (
 	//"encoding/hex"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ import (
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
 	"github.com/MaximkaSha/gophermart_loyalty/internal/storage"
 
-	"github.com/shopspring/decimal"
+	//"github.com/shopspring/decimal"
 
 	"github.com/google/uuid"
 	"github.com/theplant/luhn"
@@ -179,23 +180,20 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
 	log.Printf("Get balance data:%f,%f", balance.Current, balance.Withdrawn)
-	var bal models.BalanceD
-	tmp := strconv.FormatFloat(float64(balance.Current), 'f', 2, 32)
-	tmp1 := strconv.FormatFloat(float64(balance.Withdrawn), 'f', 2, 32)
-	bal.Cur, _ = decimal.NewFromString(tmp)
-	bal.With, _ = decimal.NewFromString(tmp1)
-	JSONdata, err := json.Marshal(bal)
+	str := `{"current":%.2f,"withdrawn":%.2f}`
+	str = fmt.Sprintf(str, balance.Current, balance.Withdrawn)
+	JSONdata, err := json.Marshal(str)
 	if err != nil {
 		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
 	log.Println("Data:")
-	log.Println(bal)
+	log.Println(balance)
 	log.Printf("Data marshal len %v", len(JSONdata))
-	if f, ok := w.(http.Flusher); ok {
+	/*if f, ok := w.(http.Flusher); ok {
 		f.Flush()
-	}
+	} */
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
