@@ -17,7 +17,7 @@ type Accural struct {
 
 func NewAccural(URL string) Accural {
 	if !utils.CheckURL(URL) {
-		log.Fatal("Accural is not availble!")
+		log.Println("Accural is not availble! Some functions are not availiable")
 	}
 	return Accural{
 		URL: URL,
@@ -25,7 +25,7 @@ func NewAccural(URL string) Accural {
 }
 
 func (a Accural) GetData(order orders.Order) (bool, orders.Order) {
-	r, err := http.Get("http://" + a.URL + "/api/orders/" + fmt.Sprint(order.Number))
+	r, err := http.Get(a.URL + "/api/orders/" + fmt.Sprint(order.Number))
 	if err != nil {
 		log.Printf("Accural GET error: %s", err)
 		return false, order
@@ -42,8 +42,9 @@ func (a Accural) GetData(order orders.Order) (bool, orders.Order) {
 	}
 	err = json.Unmarshal(body, &order)
 	if err != nil {
-		log.Printf("whoops: %s", err)
+		log.Printf("Unmarshl error accural body: %s", err)
 		return false, order
 	}
+	log.Printf("Accrual order %s, %s, %f", order.Number, order.Status, order.Accural)
 	return true, order
 }

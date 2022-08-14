@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
 )
 
@@ -35,15 +36,16 @@ func NewConfig() Config {
 		cnfg.AccrualAddr = envData
 	}
 	if flag.Lookup("a") == nil {
-		flag.StringVar(&cnfg.Addr, "a", ":80", "service start address")
+		flag.StringVar(&cnfg.Addr, "a", cnfg.Addr, "service start address")
 	}
 	if flag.Lookup("d") == nil {
-		flag.StringVar(&cnfg.DBaddr, "d", "postgres://postgres:123456@127.0.0.1:5432/loyalty?sslmode=disable", "DB URI address")
+		flag.StringVar(&cnfg.DBaddr, "d", cnfg.DBaddr, "DB URI address")
 	}
 	if flag.Lookup("r") == nil {
 		flag.StringVar(&cnfg.AccrualAddr, "r", cnfg.AccrualAddr, " Accrual system address")
 	}
 
 	flag.Parse()
+	log.Printf("Config:\nServer address: %s\nDatabase URI: %s\n Accrual: %s", cnfg.Addr, cnfg.DBaddr, cnfg.AccrualAddr)
 	return cnfg
 }

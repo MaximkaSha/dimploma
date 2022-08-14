@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+
 	"strconv"
 	"time"
 
@@ -61,8 +63,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	return
-
 }
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,6 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	return
 
 }
 
@@ -119,7 +118,9 @@ func (h *Handlers) CheckAuthMiddleWare(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		next.ServeHTTP(w, r)
+		var userName models.CtxUserName = "name"
+		ctx := context.WithValue(r.Context(), userName, session.Name)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -151,19 +152,14 @@ func (h *Handlers) PostOrders(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	order := orders.NewOrder(int64(orderNum))
+	session, _ := h.Auth.GetSessionByUUID(token)
+
+	order := orders.NewOrder(string(orderBuf))
 	w.WriteHeader(h.Store.AddOrder(order, session))
-	return
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
-	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	orders := []orders.Order{}
-	ret, orders := h.Store.GetAllOrders(session)
-	//log.Println(orders)
+	ret, orders := h.Store.GetAllOrders(h.GetSessionFromConxtex(r.Context()))
 	JSONdata, err := json.Marshal(orders)
 	if err != nil {
 		w.WriteHeader(ret)
@@ -172,25 +168,21 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
-	return
+
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
-	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	balance := models.Balance{}
-	ret, balance := h.Store.GetBalance(session)
-	//log.Println(balance)
+	ret, balance := h.Store.GetBalance(h.GetSessionFromConxtex(r.Context()))
 	JSONdata, err := json.Marshal(balance)
 	if err != nil {
+		log.Printf("Balance marshal error %s", err)
 		w.WriteHeader(ret)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
-	return
+	//return
 }
 
 func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
@@ -211,52 +203,68 @@ func (h *Handlers) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(422)
 		return
 	}
-	c, err := r.Cookie("session_token")
+	c, _ := r.Cookie("session_token")
 	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
+	session, _ := h.Auth.GetSessionByUUID(token)
 	ret := h.Store.PostWithdraw(withdrawn, session)
 	w.WriteHeader(ret)
-	return
+
 }
 
 func (h *Handlers) GetWithdraws(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session_token")
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
-	token := c.Value
-	session, err := h.Auth.GetSessionByUUID(token)
-	ret, history := h.Store.GetHistory(session)
-	//utils.SortSliceByRFC3339(history)
+	ret, history := h.Store.GetHistory(h.GetSessionFromConxtex(r.Context()))
 	JSONdata, err := json.Marshal(history)
 	if err != nil {
 		w.WriteHeader(ret)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(ret)
 	w.Write(JSONdata)
-	return
+
 }
 
 func (h *Handlers) UpdateUserInfo(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("session_token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-		}
-		token := c.Value
-		session, err := h.Auth.GetSessionByUUID(token)
+		session := h.GetSessionFromConxtex(r.Context())
 		_, orders := h.Store.GetAllOrdersToUpdate(session)
 		//log.Println(orders)
 		if len(orders) == 0 {
 			next.ServeHTTP(w, r)
+			return
 		}
 		h.Store.UpdateOrdersStatus(orders, session)
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (h Handlers) GetSessionFromConxtex(ctx context.Context) models.Session {
+	var userName models.CtxUserName = "name"
+	return models.Session{
+		Name: ctx.Value(userName).(string),
+	}
+}
+
+/*
+func _enter() {
+	// Skip this function, and fetch the PC and file for its parent
+	pc, _, _, _ := runtime.Caller(1)
+	// Retrieve a Function object this functions parent
+	functionObject := runtime.FuncForPC(pc)
+	// Regex to extract just the function name (and not the module path)
+	extractFnName := regexp.MustCompile(`^.*\.(.*)$`)
+	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
+	fmt.Printf("Entering %s\n", fnName)
+}
+
+func _exit() {
+	// Skip this function, and fetch the PC and file for its parent
+	pc, _, _, _ := runtime.Caller(1)
+	// Retrieve a Function object this functions parent
+	functionObject := runtime.FuncForPC(pc)
+	// Regex to extract just the function name (and not the module path)
+	extractFnName := regexp.MustCompile(`^.*\.(.*)$`)
+	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
+	fmt.Printf("Exiting  %s\n", fnName)
+}
+*/

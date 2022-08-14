@@ -2,17 +2,16 @@ package orders
 
 import (
 	"time"
-	//	"golang.org/x/text/number"
 )
 
 type Order struct {
-	Number     int64   `json:"number"`
+	Number     string  `json:"number"`
 	Status     string  `json:"status"`
-	Accural    float64 `json:"accural"`
-	UploadedAt string  `json:"uploaded_at"`
+	Accural    float32 `json:"accrual,omitempty"`
+	UploadedAt string  `json:"uploaded_at,omitempty"`
 }
 
-func NewOrder(number int64) Order {
+func NewOrder(number string) Order {
 	return Order{
 		Number:     number,
 		Status:     "NEW",

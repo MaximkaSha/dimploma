@@ -22,7 +22,6 @@ func NewAuth() Auth {
 	}
 }
 func (a Auth) AddSession(ses models.Session) error {
-
 	a.sessions[ses.Token] = sessionCache{
 		username: ses.Name,
 		expiry:   ses.Expiry,
@@ -52,4 +51,24 @@ func (a Auth) GetSessionByUUID(token string) (models.Session, error) {
 		return data, nil
 	}
 	return models.Session{}, errors.New("no data")
+}
+
+func (a Auth) SessionCleaner() {
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				for i := range a.sessions {
+					if a.sessions[i].expiry.Before(time.Now()) {
+						delete(a.sessions, i)
+					}
+				}
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }

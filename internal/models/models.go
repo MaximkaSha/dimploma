@@ -1,9 +1,12 @@
 package models
 
 import (
+	//"fmt"
+
 	"time"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/orders"
+	"github.com/shopspring/decimal"
 )
 
 /*
@@ -14,20 +17,27 @@ import (
 
 */
 
+type CtxUserName string
+
 type User struct {
 	Password string `json:"password"`
 	Username string `json:"login"`
 }
 
 type Balance struct {
-	Current   float64 `json:"current"`
-	Withdrawn float64 `json:"withdrawn"`
+	Current   float32 `json:"current"`
+	Withdrawn float32 `json:"withdrawn"`
+}
+
+type BalanceD struct {
+	Cur  decimal.Decimal `json:"current"`
+	With decimal.Decimal `json:"withdrawn"`
 }
 
 type Withdrawn struct {
 	Order       string  `json:"order"`
-	Sum         float64 `json:"sum"`
-	ProcessedAt string  `json:"processed_at"`
+	Sum         float32 `json:"sum"`
+	ProcessedAt string  `json:"processed_at,omitempty"`
 }
 
 func NewWithdrawn() Withdrawn {
@@ -56,4 +66,15 @@ type Storager interface {
 
 func (s Session) IsExpired() bool {
 	return s.Expiry.Before(time.Now())
+}
+
+/*
+type Balance struct {
+	Current   float32 `json:"current"`
+	Withdrawn float32 `json:"withdrawn"`
+}
+*/
+
+func (c CtxUserName) String() string {
+	return string(c)
 }

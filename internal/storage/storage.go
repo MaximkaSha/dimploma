@@ -108,8 +108,8 @@ CREATE TABLE IF NOT EXISTS public.balance
 (
     id serial ,
     userid bigint NOT NULL,
-    current double precision,
-    withdrawn double precision,
+    current real NOT NULL,
+    withdrawn real NOT NULL,
 	primary key(userid)
 );
 CREATE TABLE IF NOT EXISTS public.history
@@ -162,7 +162,10 @@ func (s Storage) AddOrder(order orders.Order, session models.Session) int {
 func (s Storage) GetAllOrders(session models.Session) (int, []orders.Order) {
 	var query = `SELECT ordernum , status , accural , upload_time from orders where userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
-	//	err = rows.Err()
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 204, []orders.Order{}
@@ -188,7 +191,10 @@ func (s Storage) GetAllOrders(session models.Session) (int, []orders.Order) {
 func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Order) {
 	var query = `SELECT ordernum , status , accural , upload_time FROM public.orders WHERE status = 'NEW' OR status = 'PROCESSING' AND userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
-	//	err = rows.Err()
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 204, []orders.Order{}
@@ -206,6 +212,7 @@ func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Ord
 		data = append(data, model)
 	}
 	if counter == 0 {
+		log.Println("no data was found to update")
 		return 204, data
 	}
 	//log.Println(data)
@@ -215,10 +222,13 @@ func (s Storage) GetAllOrdersToUpdate(session models.Session) (int, []orders.Ord
 func (s Storage) GetBalance(session models.Session) (int, models.Balance) {
 	var query = `SELECT current, withdrawn from balance WHERE userid = (SELECT id from users where username = $1)`
 	data := models.Balance{}
+	//log.Println(session)
 	err := s.DB.QueryRow(query, session.Name).Scan(&data.Current, &data.Withdrawn)
+	//log.Println(session)
+	//log.Println(data)
 	if err != nil {
-		log.Printf("Error %s when getting balance  data", err)
-		return 500, models.Balance{}
+		log.Printf("Error %s when getting balance data", err)
+		return 204, models.Balance{}
 	}
 	return 200, data
 }
@@ -251,7 +261,7 @@ func (s Storage) UpdateBalance(balance models.Balance, session models.Session) e
 func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session) int {
 	err, balance := s.GetBalance(session)
 	if err != 200 {
-		return 500
+		log.Println("no balance")
 	}
 	if balance.Current < withdrawn.Sum {
 		return 402
@@ -272,6 +282,10 @@ func (s Storage) PostWithdraw(withdrawn models.Withdrawn, session models.Session
 func (s Storage) GetHistory(session models.Session) (int, []models.Withdrawn) {
 	var query = `SELECT sum , processed_at , "order"  from history where userid = (SELECT id from users where username = $1)`
 	rows, err := s.DB.Query(query, session.Name)
+	errRow := rows.Err()
+	if errRow != nil {
+		log.Printf("Error %s when getting all  data", errRow)
+	}
 	if err != nil {
 		log.Printf("Error %s when getting all  data", err)
 		return 500, []models.Withdrawn{}
@@ -299,16 +313,23 @@ func (s Storage) GetHistory(session models.Session) (int, []models.Withdrawn) {
 func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Session) {
 	ret, balance := s.GetBalance(session)
 	if ret != 200 {
-		log.Println("Error getting balance on update.")
-		return
+		log.Printf("No balance data for user: %s", session.Name)
+		//	return
 	}
 	for i := range orders {
+		//log.Printf("User before %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
 		if upd, order := s.Accural.GetData(orders[i]); upd {
 			orders[i] = order
 			if order.Status == "PROCESSED" {
+				//log.Printf("Current bal:%f, order bal:%f", balance.Current, order.Accural)
 				balance.Current = balance.Current + order.Accural
 			}
 		}
+		//log.Printf("User after %s order #%s: %s\n Current balace: %f", session.Name, orders[i].Number, orders[i].Status, balance.Current)
+	}
+	if len(orders) == 0 {
+		log.Println("No orders to update")
+		return
 	}
 	err := s.BatchUpdateOrders(orders)
 	if err != nil {
@@ -316,11 +337,13 @@ func (s Storage) UpdateOrdersStatus(orders []orders.Order, session models.Sessio
 	}
 	//это наверное надо в пачку засунуть, а то получиться, что заказы обновились, а бабки не начислились
 	// печальная будет ситуация :)
+	log.Printf("balance Update curr = %f, with = %f", float32(balance.Current), float32(balance.Withdrawn))
 	err = s.UpdateBalance(balance, session)
 	if err != nil {
 		log.Println("Error updating balance on update.")
 		return
 	}
+	//log.Println(s.GetBalance(session))
 
 }
 

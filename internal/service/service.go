@@ -1,6 +1,9 @@
 package service
 
 import (
+	"compress/flate"
+	//"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/MaximkaSha/gophermart_loyalty/internal/config"
@@ -8,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog"
 )
 
 type Service struct {
@@ -22,10 +26,15 @@ func NewService() *Service {
 
 func (s *Service) StartService() {
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	cnfg := config.NewConfig()
-	// URL accrual and DB
-	handler := handlers.NewHandlers(cnfg)
+	logger := httplog.NewLogger("logger", httplog.Options{
+		JSON:     false,
+		LogLevel: "trace",
+	})
+	compressor := middleware.NewCompressor(flate.DefaultCompression)
+	r.Use(compressor.Handler)
+	r.Use(httplog.RequestLogger(logger))
+	handler := handlers.NewHandlers(s.cnfg)
+	go handler.Auth.SessionCleaner()
 
 	//pub access
 	r.Post("/api/user/register", handler.Register)
@@ -44,6 +53,28 @@ func (s *Service) StartService() {
 		})
 
 	})
-
-	http.ListenAndServe(s.cnfg.Addr, r)
+	log.Printf("Started service on %s", s.cnfg.Addr)
+	if err := http.ListenAndServe(s.cnfg.Addr, r); err != nil {
+		log.Printf("Server shutdown: %s", err.Error())
+	}
 }
+
+/*
+func (s Service) Test(w http.ResponseWriter, r *http.Request) {
+	type JSONtest struct {
+		Current   float32 `json:"current"`
+		Withdrawn float32 `json:"withdrawn"`
+	}
+	tst := JSONtest{
+		Current:   729.98,
+		Withdrawn: 0,
+	}
+	JSNd, err := json.Marshal(tst)
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(200)
+	log.Println("HARDCODED")
+	w.Write(JSNd)
+}*/
